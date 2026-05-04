@@ -1,11 +1,18 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// Oyage machine eke IP address eka methana replace karanna
-const API_URL = 'http://192.168.8.198:5000/api'; 
+
+
+const MY_IP = '192.168.8.198'; 
+const PORT = '5000';
+
+
+export const API_BASE_URL = Platform.OS === 'web' 
+  ? `http://localhost:5000/api` 
+  : `http://192.168.8.198:5000/api`;
 
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },

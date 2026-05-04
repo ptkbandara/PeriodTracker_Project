@@ -15,28 +15,34 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
 
+
+
 export default function RegisterScreen() {
   const router = useRouter();
   const [name, setName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
+  const API_BASE_URL = Platform.OS === 'web' 
+   ? `http://localhost:5000/api` 
+   : `http://192.168.8.198:5000/api`;
+
   const handleRegister = async () => {
     
-    if (!name || !email || !password) {
+    if (!name || !username || !password) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
-    try {
+   try {
       
-      const response = await fetch("http://192.168.8.198:5000/api/auth/register", {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ name, username, password }), 
       });
-
       const data = await response.json();
 
       
@@ -82,6 +88,20 @@ export default function RegisterScreen() {
               placeholderTextColor="#9ca3af"
               value={name}
               onChangeText={setName}
+            />
+          </View>
+
+          {/* Username */}
+          
+          <View style={styles.inputContainer}>
+            <Ionicons name="at-outline" size={20} color={Colors.secondary} />
+            <TextInput
+              style={styles.input}
+              placeholder="Username"
+              placeholderTextColor="#9ca3af"
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize="none"
             />
           </View>
 

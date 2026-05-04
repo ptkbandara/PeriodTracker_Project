@@ -13,16 +13,17 @@ export default function TabsLayout() {
           ),
         }}
       />
-     <Tabs.Screen
-        name="Calendar"
-        options={{
-          title: "Calendar",
+     
+      <Tabs.Screen
+        name="Track"
+        options={{            
+          title: "Track",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar" size={size} color={color} />
+            <Ionicons name="pulse" size={size} color={color} /> 
           ),
         }}
       />
-       <Tabs.Screen
+      <Tabs.Screen
         name="Consult"
         options={{
           title: "Consult",
@@ -31,7 +32,7 @@ export default function TabsLayout() {
           ),
         }}
       />
-       <Tabs.Screen
+      <Tabs.Screen
         name="Profile"
         options={{
           title: "Profile",
