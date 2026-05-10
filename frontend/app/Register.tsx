@@ -13,9 +13,6 @@ import {
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { Colors } from '../constants/Colors';
-
-
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -30,14 +27,12 @@ export default function RegisterScreen() {
    : `http://192.168.8.198:5000/api`;
 
   const handleRegister = async () => {
-    
     if (!name || !username || !password) {
       Alert.alert("Error", "Please fill in all fields");
       return;
     }
 
    try {
-      
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -45,29 +40,23 @@ export default function RegisterScreen() {
       });
       const data = await response.json();
 
-      
       if (response.ok) {
-        
         Alert.alert("Success", "Account created successfully! Please Login.");
         router.replace("/login");
       } else {
-        
         Alert.alert("Registration Failed", data.message);
       }
-
     } catch (err) {
-      // Network/Server Error
       Alert.alert("Connection Error", "Cannot connect to server. Check your internet or IP.");
     }
   };
-
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={styles.container}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
+      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
 
         {/* HEADER */}
         <View style={styles.header}>
@@ -81,7 +70,7 @@ export default function RegisterScreen() {
 
           {/* Name */}
           <View style={styles.inputContainer}>
-            <Ionicons name="person-outline" size={20} color={Colors.secondary} />
+            <Ionicons name="person-outline" size={20} color="#9333EA" />
             <TextInput
               style={styles.input}
               placeholder="Full Name"
@@ -92,9 +81,8 @@ export default function RegisterScreen() {
           </View>
 
           {/* Username */}
-          
           <View style={styles.inputContainer}>
-            <Ionicons name="at-outline" size={20} color={Colors.secondary} />
+            <Ionicons name="at-outline" size={20} color="#9333EA" />
             <TextInput
               style={styles.input}
               placeholder="Username"
@@ -107,7 +95,7 @@ export default function RegisterScreen() {
 
           {/* Email */}
           <View style={styles.inputContainer}>
-            <Ionicons name="mail-outline" size={20} color={Colors.secondary} />
+            <Ionicons name="mail-outline" size={20} color="#9333EA" />
             <TextInput
               style={styles.input}
               placeholder="Email Address"
@@ -121,7 +109,7 @@ export default function RegisterScreen() {
 
           {/* Password */}
           <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={20} color={Colors.secondary} />
+            <Ionicons name="lock-closed-outline" size={20} color="#9333EA" />
             <TextInput
               style={styles.input}
               placeholder="Password"
@@ -129,21 +117,20 @@ export default function RegisterScreen() {
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
-              
           />
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-        <Ionicons 
-            name={showPassword ? "eye" : "eye-off"} 
-            size={24} 
-            color="lightgrey" 
-        />
-    </TouchableOpacity>
+              <Ionicons 
+                  name={showPassword ? "eye" : "eye-off"} 
+                  size={22} 
+                  color="#9ca3af" 
+              />
+            </TouchableOpacity>
           </View>
 
           {/* REGISTER BUTTON */}
           <TouchableOpacity onPress={handleRegister} style={styles.buttonContainer}>
             <LinearGradient
-              colors={[Colors.gradientStart, Colors.gradientEnd]}
+              colors={['#A855F7', '#9333EA']}
               style={styles.button}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
@@ -169,7 +156,7 @@ export default function RegisterScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#F3E8FF', // NEW: Soft beautiful light purple background
   },
   scrollContainer: {
     flexGrow: 1,
@@ -184,7 +171,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 30,
     fontWeight: '800',
-    color: Colors.secondary,
+    color: '#9333EA', 
     marginBottom: 8,
   },
   subtitle: {
@@ -197,27 +184,33 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: '#FFFFFF', // Clean white
     borderRadius: 16,
     paddingHorizontal: 15,
     marginBottom: 18,
     height: 56,
-    borderWidth: 1,
-    borderColor: '#f3e8ff',
+    // NEW: 3D Shadow effect instead of a flat border
+    shadowColor: '#9333EA',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 3, 
   },
   input: {
     flex: 1,
     marginLeft: 10,
-    color: '#111827',
+    color: '#1E293B',
+    fontSize: 16,
   },
   buttonContainer: {
     marginTop: 10,
     marginBottom: 25,
     borderRadius: 30,
     overflow: 'hidden',
-    shadowColor: Colors.primary,
-    shadowOpacity: 0.25,
-    shadowRadius: 6,
+    shadowColor: '#9333EA',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
     elevation: 6,
   },
   button: {
@@ -225,9 +218,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   buttonText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontSize: 17,
-    fontWeight: '700',
+    fontWeight: 'bold',
     letterSpacing: 1,
   },
   footer: {
@@ -239,8 +232,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   loginText: {
-    color: Colors.primary,
+    color: '#9333EA', 
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: 'bold',
   },
 });
