@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
 
-// 💡 ඔයාගේ Backend API URL එක
+//  Backend API URL 
 const API_BASE_URL = Platform.OS === 'web' ? `http://localhost:5000/api` : `http://192.168.8.198:5000/api`; 
 
 export default function AllDoctorsScreen() {
@@ -15,7 +15,7 @@ export default function AllDoctorsScreen() {
   const [selectedProvince, setSelectedProvince] = useState('All Provinces');
   const [selectedDistrict, setSelectedDistrict] = useState('All Districts');
 
-  // Backend එකෙන් එන Doctors ලා සේව් කරගන්න State එක
+  
   const [allDoctors, setAllDoctors] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,7 +40,7 @@ export default function AllDoctorsScreen() {
     setSelectedDistrict('All Districts');
   };
 
-  // 💡 Component එක ලෝඩ් වෙද්දීම Backend එකෙන් Doctors ලාව Fetch කරනවා
+  
   useEffect(() => {
     fetchDoctorsFromDB();
   }, []);
@@ -48,7 +48,7 @@ export default function AllDoctorsScreen() {
   const fetchDoctorsFromDB = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(`${API_BASE_URL}/doctors`); // ඔයාගේ Backend Route එක
+      const response = await axios.get(`${API_BASE_URL}/doctors`); 
       
       if (response.data && response.data.length > 0) {
         setAllDoctors(response.data);
@@ -57,13 +57,13 @@ export default function AllDoctorsScreen() {
       }
     } catch (error) {
       console.log("Error fetching doctors, loading fallback data...", error);
-      loadFallbackData(); // Backend එක නැත්නම් Backup ඩේටා ටික ලෝඩ් කරනවා
+      loadFallbackData(); 
     } finally {
       setLoading(false);
     }
   };
 
-  // 💡 Backend එක වැඩ නැත්නම් පෙන්වන Backup Data
+  
   const loadFallbackData = () => {
     setAllDoctors([
       { _id: '1', name: 'Dr. Hemantha Dodampahala', specialty: 'Gynecologist', rating: '4.9', experience: '25 Yrs', province: 'Western', district: 'Colombo', hospital: 'Nawaloka Hospital', image: '👨‍⚕️' },
@@ -88,9 +88,18 @@ export default function AllDoctorsScreen() {
     <View style={styles.container}>
       <LinearGradient colors={['#7C3AED', '#A855F7']} style={styles.headerBackground}>
         <View style={styles.headerTop}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="chevron-back" size={24} color="white" />
-          </TouchableOpacity>
+          <TouchableOpacity 
+  onPress={() => {
+    if (router.canGoBack()) {
+      router.back(); 
+    } else {
+      router.replace('/Consult'); 
+    }
+  }} 
+  style={styles.backButton}
+>
+  <Ionicons name="arrow-back" size={24} color="white" />
+</TouchableOpacity>
           <Text style={styles.headerTitle}>Find Specialists</Text>
           <View style={{ width: 40 }} /> 
         </View>
@@ -147,7 +156,7 @@ export default function AllDoctorsScreen() {
           {loading ? 'Searching...' : `${filteredDoctors.length} ${filteredDoctors.length === 1 ? 'Doctor' : 'Doctors'} Found`}
         </Text>
 
-        {/* 💡 Loading State එක */}
+        {/* Loading State  */}
         {loading ? (
           <View style={{ marginTop: 40, alignItems: 'center' }}>
             <ActivityIndicator size="large" color="#A855F7" />

@@ -1,81 +1,63 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator, Platform } from 'react-native';
+import React from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Platform, Linking } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = Platform.OS === 'web' ? `http://localhost:5000/api` : `http://192.168.8.198:5000/api`; 
-
-export default function BookDoctorScreen() {
+export default function DoctorProfileScreen() {
   const router = useRouter();
   
-  // Consult / AllDoctors පේජ් එකෙන් එවන විස්තර
+  // Extract parameters passed from Consult / AllDoctors screens
   const params = useLocalSearchParams();
   const { id, name, specialty, rating, experience, image, hospital, location } = params;
 
-  const [selectedDate, setSelectedDate] = useState('28');
-  const [selectedTime, setSelectedTime] = useState('10:00 AM');
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // --- Hospital Contact Functions ---
 
-  const availableDates = [
-    { day: 'Mon', date: '27' },
-    { day: 'Tue', date: '28' },
-    { day: 'Wed', date: '29' },
-    { day: 'Thu', date: '30' },
-    { day: 'Fri', date: '01' },
-    { day: 'Sat', date: '02' },
-  ];
-
-  const availableTimes = ['09:00 AM', '10:00 AM', '11:30 AM', '02:00 PM', '04:00 PM', '06:30 PM'];
-
-  const handleBooking = async () => {
-    try {
-      setIsSubmitting(true);
-      const userId = await AsyncStorage.getItem("userId") || "65f1a2b3c4d5e6f7g8h9i0j1";
-
-      const appointmentData = {
-        userId: userId,
-        doctorId: id,
-        doctorName: name,
-        hospital: hospital || "General Hospital",
-        date: `April ${selectedDate}`,
-        time: selectedTime
-      };
-
-      await axios.post(`${API_BASE_URL}/appointments/book`, appointmentData);
-
-      Alert.alert(
-        "Booking Confirmed! 🎉", 
-        `Your appointment with ${name} is successfully scheduled.`,
-        [{ text: "Great!", onPress: () => router.back() }]
-      );
-    } catch (error) {
-      console.log("Booking error:", error);
-      Alert.alert("Error", "Failed to book appointment. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleCallHospital = () => {
+    // Replace this with the actual dynamic hospital phone number if available
+    const phoneNumber = 'tel:+94112691111'; // Example: General Hospital Colombo
+    Linking.openURL(phoneNumber).catch(err => Alert.alert("Error", "Could not open the dialer."));
   };
+
+  const handleVisitWebsite = () => {
+    // Replace this with the actual hospital website or booking portal link
+    const websiteUrl = 'https://echannelling.com/'; 
+    Linking.openURL(websiteUrl).catch(err => Alert.alert("Error", "Could not open the browser."));
+  };
+  
+ 
 
   return (
     <View style={styles.container}>
+      {/* Top Header Section */}
       <LinearGradient colors={['#A855F7', '#9333EA']} style={styles.headerBackground}>
         <View style={styles.headerTop}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="white" />
-          </TouchableOpacity>
+          <TouchableOpacity 
+  onPress={() => {
+    if (router.canGoBack()) {
+      router.back(); 
+    } else {
+      router.replace('/AllDoctors'); 
+    }
+  }} 
+  style={styles.backButton}
+>
+  <Ionicons name="arrow-back" size={24} color="white" />
+</TouchableOpacity>
           <View>
-             <Text style={styles.headerTitle}>Book Appointment</Text>
-             <Text style={styles.headerSubtitle}>View details and schedule</Text>
+             <Text style={styles.headerTitle}>Doctor Profile</Text>
+             <Text style={styles.headerSubtitle}>View details & contact clinic</Text>
           </View>
         </View>
       </LinearGradient>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      {/* Scrollable Content */}
+      <ScrollView 
+        showsVerticalScrollIndicator={false} 
+        contentContainerStyle={styles.scrollContent}
+      >
         
-        {/* Profile Card (Overlapping Header) */}
+        {/* Profile Card (Now naturally placed below the header without overlapping bugs) */}
         <View style={styles.mainCard}>
           <View style={styles.profileRow}>
              <View style={styles.doctorImagePlaceholder}>
@@ -92,7 +74,7 @@ export default function BookDoctorScreen() {
              </View>
           </View>
 
-          {/* Stats Row */}
+          {/* Quick Stats Row */}
           <View style={styles.statsRow}>
              <View style={styles.statBox}>
                 <Ionicons name="ribbon-outline" size={22} color="#A855F7" />
@@ -107,7 +89,7 @@ export default function BookDoctorScreen() {
           </View>
         </View>
 
-        {/* Doctor Details (About & Services merged for compact view) */}
+        {/* Doctor Details & Services Section */}
         <View style={styles.sectionCard}>
            <View style={styles.sectionHeader}>
               <View style={styles.dot} />
@@ -122,91 +104,57 @@ export default function BookDoctorScreen() {
            </View>
         </View>
 
-        {/* Clinic Location */}
+        {/* Clinic Location & External Contact Section */}
         <View style={styles.sectionCard}>
            <View style={styles.sectionHeader}>
               <View style={styles.dot} />
-              <Text style={styles.sectionTitle}>Clinic Location</Text>
+              <Text style={styles.sectionTitle}>Clinic & Contact</Text>
            </View>
            <View style={styles.locationRow}>
               <View style={styles.locationIconBox}>
-                 <Ionicons name="location-outline" size={24} color="#A855F7" />
+                 <Ionicons name="business-outline" size={24} color="#A855F7" />
               </View>
               <View style={{ flex: 1 }}>
                  <Text style={styles.hospitalName}>{hospital || "General Hospital"}</Text>
                  <Text style={styles.hospitalAddress}>{location || "Colombo, Western"}</Text>
               </View>
            </View>
-        </View>
+           
+           {/* Hospital Connect Buttons (Call & Website) */}
+           <View style={styles.contactActionRow}>
+               <TouchableOpacity style={styles.contactBtn} onPress={handleCallHospital}>
+                   <Ionicons name="call" size={18} color="#059669" />
+                   <Text style={[styles.contactBtnText, { color: '#059669' }]}>Call Clinic</Text>
+               </TouchableOpacity>
 
-        {/* --- SCHEDULE SECTION --- */}
-        <View style={styles.sectionHeaderLine}>
-           <View style={styles.dot} />
-           <Text style={styles.sectionTitle}>Select Schedule</Text>
-        </View>
-
-        {/* Date Selection */}
-        <Text style={styles.subTitle}>April 2026</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dateScroll}>
-          {availableDates.map((item, index) => (
-            <TouchableOpacity 
-              key={index} 
-              style={[styles.dateCard, selectedDate === item.date && styles.selectedDateCard]}
-              onPress={() => setSelectedDate(item.date)}
-            >
-              <Text style={[styles.dayText, selectedDate === item.date && styles.selectedText]}>{item.day}</Text>
-              <Text style={[styles.dateNumberText, selectedDate === item.date && styles.selectedText]}>{item.date}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
-        {/* Time Selection */}
-        <Text style={[styles.subTitle, { marginTop: 15 }]}>Available Time</Text>
-        <View style={styles.timeGrid}>
-          {availableTimes.map((time, index) => (
-            <TouchableOpacity 
-              key={index} 
-              style={[styles.timeCard, selectedTime === time && styles.selectedTimeCard]}
-              onPress={() => setSelectedTime(time)}
-            >
-              <Text style={[styles.timeText, selectedTime === time && styles.selectedText]}>{time}</Text>
-            </TouchableOpacity>
-          ))}
+               <TouchableOpacity style={styles.contactBtn} onPress={handleVisitWebsite}>
+                   <Ionicons name="globe-outline" size={18} color="#2563EB" />
+                   <Text style={[styles.contactBtnText, { color: '#2563EB' }]}>Visit Website</Text>
+               </TouchableOpacity>
+           </View>
         </View>
 
       </ScrollView>
-
-      {/* Bottom Booking Button */}
-      <View style={styles.bottomFooter}>
-        <TouchableOpacity 
-          style={[styles.confirmButton, isSubmitting && { opacity: 0.7 }]} 
-          onPress={handleBooking}
-          disabled={isSubmitting}
-        >
-          <LinearGradient colors={['#A855F7', '#D946EF']} style={styles.confirmGradient}>
-            {isSubmitting ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text style={styles.confirmButtonText}>Confirm Booking • {selectedTime}</Text>
-            )}
-          </LinearGradient>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F8FAFC' },
-  headerBackground: { paddingTop: 60, paddingBottom: 60, paddingHorizontal: 20, borderBottomLeftRadius: 35, borderBottomRightRadius: 35 },
+  
+  // FIX: Reduced paddingBottom so the header is not too large
+  headerBackground: { paddingTop: Platform.OS === 'android' ? 40 : 60, paddingBottom: 30, paddingHorizontal: 20, borderBottomLeftRadius: 35, borderBottomRightRadius: 35 },
   headerTop: { flexDirection: 'row', alignItems: 'center' },
   backButton: { marginRight: 15 },
   headerTitle: { fontSize: 22, fontWeight: 'bold', color: 'white' },
   headerSubtitle: { fontSize: 13, color: '#E9D5FF', marginTop: 2 },
   
-  scrollContent: { paddingHorizontal: 20, paddingBottom: 120 },
+  // FIX: Added paddingTop so the card sits nicely below the header
+  scrollContent: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 30 }, 
   
-  mainCard: { backgroundColor: 'white', borderRadius: 25, padding: 20, marginTop: -40, shadowColor: '#A855F7', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 15, elevation: 5, marginBottom: 20 },
+  // FIX: Removed marginTop: -40 and zIndex to prevent Android rendering overlap bugs
+  mainCard: { backgroundColor: 'white', borderRadius: 25, padding: 20, shadowColor: '#A855F7', shadowOffset: { width: 0, height: 10 }, shadowOpacity: 0.1, shadowRadius: 15, elevation: 8, marginBottom: 20 },
+  
   profileRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
   doctorImagePlaceholder: { width: 70, height: 70, borderRadius: 20, backgroundColor: '#F3E8FF', justifyContent: 'center', alignItems: 'center', marginRight: 15 },
   profileInfo: { flex: 1 },
@@ -236,23 +184,8 @@ const styles = StyleSheet.create({
   hospitalName: { fontSize: 14, fontWeight: 'bold', color: '#1E293B', marginBottom: 2 },
   hospitalAddress: { fontSize: 12, color: '#64748B' },
 
-  sectionHeaderLine: { flexDirection: 'row', alignItems: 'center', marginTop: 10, marginBottom: 15 },
-  subTitle: { fontSize: 14, fontWeight: '600', color: '#475569', marginBottom: 10 },
-
-  dateScroll: { flexDirection: 'row' },
-  dateCard: { width: 65, height: 80, backgroundColor: 'white', borderRadius: 15, justifyContent: 'center', alignItems: 'center', marginRight: 12, borderWidth: 1, borderColor: '#F1F5F9' },
-  selectedDateCard: { backgroundColor: '#A855F7', borderColor: '#A855F7' },
-  dayText: { fontSize: 12, color: '#64748B', marginBottom: 5 },
-  dateNumberText: { fontSize: 18, fontWeight: 'bold', color: '#1E293B' },
-  
-  timeGrid: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between' },
-  timeCard: { width: '31%', backgroundColor: 'white', paddingVertical: 12, borderRadius: 12, alignItems: 'center', marginBottom: 15, borderWidth: 1, borderColor: '#F1F5F9' },
-  selectedTimeCard: { backgroundColor: '#A855F7', borderColor: '#A855F7' },
-  timeText: { fontSize: 12, fontWeight: '600', color: '#475569' },
-  selectedText: { color: 'white' },
-
-  bottomFooter: { position: 'absolute', bottom: 0, width: '100%', backgroundColor: 'white', padding: 20, borderTopLeftRadius: 30, borderTopRightRadius: 30, shadowColor: '#000', shadowOffset: { width: 0, height: -5 }, shadowOpacity: 0.05, shadowRadius: 10, elevation: 10 },
-  confirmButton: { width: '100%', borderRadius: 20, overflow: 'hidden' },
-  confirmGradient: { paddingVertical: 18, alignItems: 'center' },
-  confirmButtonText: { color: 'white', fontSize: 16, fontWeight: 'bold' },
+  // Hospital Action Button Styles
+  contactActionRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 15, paddingTop: 15, borderTopWidth: 1, borderTopColor: '#F1F5F9' },
+  contactBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F8FAFC', paddingVertical: 10, borderRadius: 12, flex: 0.48, borderWidth: 1, borderColor: '#E2E8F0' },
+  contactBtnText: { fontSize: 13, fontWeight: 'bold', marginLeft: 8 },
 });
