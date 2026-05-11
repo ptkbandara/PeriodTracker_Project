@@ -2,17 +2,19 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
 import { Platform } from 'react-native';
 
-// Notification එකක් ආවම ෆෝන් එකේ පෙන්වන විදිහ
+// 1. Fixed: Added missing required properties for NotificationBehavior
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowBanner: true, // Required by TS
+    shouldShowList: true,   // Required by TS
   }),
 });
 
 export async function requestNotificationPermissions() {
-  if (Platform.OS === 'web') return false; 
+  if (Platform.OS === 'web') return false;
 
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync('default', {
@@ -31,64 +33,61 @@ export async function requestNotificationPermissions() {
       finalStatus = status;
     }
     if (finalStatus !== 'granted') {
-      console.log('Failed to get push token for push notification!');
+      alert('Failed to get push token for push notification!');
       return false;
     }
     return true;
+  } else {
+    console.log('Must use physical device for Push Notifications');
+    return false;
   }
-  return false;
 }
 
 export async function schedulePeriodReminder(nextPeriodDate: Date) {
-  if (Platform.OS === 'web') return; 
+  if (Platform.OS === 'web') return;
 
   const triggerDate = new Date(nextPeriodDate);
-  triggerDate.setDate(triggerDate.getDate() - 2); 
-  triggerDate.setHours(9, 0, 0); 
+  triggerDate.setDate(triggerDate.getDate() - 2);
+  triggerDate.setHours(9, 0, 0, 0);
 
-  await Notifications.cancelAllScheduledNotificationsAsync(); 
+  if (triggerDate <= new Date()) return;
 
-  const secondsUntilTrigger = Math.floor((triggerDate.getTime() - new Date().getTime()) / 1000);
+  await Notifications.cancelAllScheduledNotificationsAsync();
 
-  if (secondsUntilTrigger > 0) {
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "🌸 Period Reminder",
-        body: "Your next period is expected in 2 days. Be prepared and take care! ✨",
-        sound: true,
-      },
-      // 💡 අර දිග කෝඩ් එක වෙනුවට කෙලින්ම වචනෙන් දෙනවා
-      trigger: { 
-        type: 'timeInterval', 
-        seconds: secondsUntilTrigger 
-      }, 
-    });
-  }
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "🌸 Period Reminder",
+      body: "Your next period is expected in 2 days. Be prepared and take care! ✨",
+      sound: true,
+      // 2. Fixed: Removed the 'android' object from here as it's often invalid in ContentInput types
+    },
+    // 3. Fixed: Wrapped Date in the correct trigger format
+    trigger: {
+      date: triggerDate,
+    } as Notifications.DateTriggerInput, 
+  });
 }
 
 export async function scheduleOvulationReminder(ovulationDate: Date) {
-  if (Platform.OS === 'web') return; 
+  if (Platform.OS === 'web') return;
 
   const triggerDate = new Date(ovulationDate);
-  triggerDate.setDate(triggerDate.getDate() - 1); 
-  triggerDate.setHours(10, 0, 0); 
+  triggerDate.setDate(triggerDate.getDate() - 1);
+  triggerDate.setHours(10, 0, 0, 0);
 
-  const secondsUntilTrigger = Math.floor((triggerDate.getTime() - new Date().getTime()) / 1000);
+  if (triggerDate <= new Date()) return;
 
-  if (secondsUntilTrigger > 0) {
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: "✨ Fertility Window Approaching",
-        body: "Your ovulation day is tomorrow. High chances of fertility! 💜",
-        sound: true,
-      },
-      // 💡 කෙලින්ම වචනෙන් දෙනවා
-      trigger: { 
-        type: 'timeInterval', 
-        seconds: secondsUntilTrigger 
-      }, 
-    });
-  }
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "✨ Fertility Window Approaching",
+      body: "Your ovulation day is tomorrow. High chances of fertility! 💜",
+      sound: true,
+    },
+    // 3. Fixed: Wrapped Date in the correct trigger format
+    trigger: {
+      date: triggerDate,
+    } as Notifications.DateTriggerInput,
+  });
 }
 
 export async function testNotification() {
@@ -100,13 +99,13 @@ export async function testNotification() {
   await Notifications.scheduleNotificationAsync({
     content: {
       title: "Test Successful! 🚀",
-      body: "Notifications are perfectly working in your app.",
+      body: "Notifications are working perfectly.",
       sound: true,
     },
-    // 💡 බෙල් අයිකන් එකටත් ඒ විදිහටම හැදුවා
-    trigger: { 
-      type: 'timeInterval', 
-      seconds: 5 
-    }, 
+    // 4. Fixed: Added required 'type' for timeInterval
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+      seconds: 2,
+    },
   });
 }
